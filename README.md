@@ -2,7 +2,7 @@
 
 Whatapp is a Frappe app that provides a desk UI for the Go WhatsApp multi-device service from `aldinokemal/go-whatsapp-web-multidevice`.
 
-Current app version: `0.2.0`
+Current app version: `0.2.1`
 
 ## Features
 

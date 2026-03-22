@@ -4,7 +4,7 @@ app_publisher = "Ahmad"
 app_description = "Frappe UI desk for Go WhatsApp multi-device service"
 app_email = "info@ideaorbit.net"
 app_license = "MIT"
-app_version = "0.2.0"
+app_version = "0.2.1"
 
 required_apps = ["frappe"]
 

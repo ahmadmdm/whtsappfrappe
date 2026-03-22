@@ -1,0 +1,182 @@
+{
+	"actions": [],
+	"creation": "2026-03-22 00:00:00.000000",
+	"doctype": "DocType",
+	"engine": "InnoDB",
+	"field_order": [
+		"service_section",
+		"enabled",
+		"service_url",
+		"default_device_id",
+		"column_break_fzkl",
+		"request_timeout",
+		"basic_auth_username",
+		"basic_auth_password",
+		"notifications_section",
+		"notification_forwarding_enabled",
+		"notification_default_device_id",
+		"notification_allowed_types",
+		"notification_max_length",
+		"notification_skip_own",
+		"notification_include_link",
+		"notification_include_content",
+		"notification_include_sender",
+		"notification_message_template",
+		"webhook_section",
+		"webhook_secret",
+		"webhook_events",
+		"notes"
+	],
+	"fields": [
+		{
+			"fieldname": "service_section",
+			"fieldtype": "Section Break",
+			"label": "Service"
+		},
+		{
+			"default": "1",
+			"fieldname": "enabled",
+			"fieldtype": "Check",
+			"label": "Enabled"
+		},
+		{
+			"fieldname": "service_url",
+			"fieldtype": "Data",
+			"label": "Service URL",
+			"reqd": 0,
+			"description": "Base URL of the running GoWA REST service"
+		},
+		{
+			"fieldname": "default_device_id",
+			"fieldtype": "Data",
+			"label": "Default Device ID"
+		},
+		{
+			"fieldname": "column_break_fzkl",
+			"fieldtype": "Column Break"
+		},
+		{
+			"default": "45",
+			"fieldname": "request_timeout",
+			"fieldtype": "Int",
+			"label": "Request Timeout"
+		},
+		{
+			"fieldname": "basic_auth_username",
+			"fieldtype": "Data",
+			"label": "Basic Auth Username"
+		},
+		{
+			"fieldname": "basic_auth_password",
+			"fieldtype": "Password",
+			"label": "Basic Auth Password"
+		},
+		{
+			"fieldname": "notifications_section",
+			"fieldtype": "Section Break",
+			"label": "User Notification Delivery"
+		},
+		{
+			"default": "0",
+			"fieldname": "notification_forwarding_enabled",
+			"fieldtype": "Check",
+			"label": "Forward User Notifications to WhatsApp"
+		},
+		{
+			"fieldname": "notification_default_device_id",
+			"fieldtype": "Data",
+			"label": "Notification Device ID",
+			"description": "Optional device used for notification delivery before falling back to the main default device"
+		},
+		{
+			"fieldname": "notification_allowed_types",
+			"fieldtype": "Data",
+			"label": "Allowed Notification Types",
+			"description": "Comma-separated Notification Log types such as Mention, Assignment, Alert"
+		},
+		{
+			"default": "1000",
+			"fieldname": "notification_max_length",
+			"fieldtype": "Int",
+			"label": "Notification Message Max Length"
+		},
+		{
+			"default": "1",
+			"fieldname": "notification_skip_own",
+			"fieldtype": "Check",
+			"label": "Skip Self Notifications"
+		},
+		{
+			"default": "1",
+			"fieldname": "notification_include_link",
+			"fieldtype": "Check",
+			"label": "Include Document Link"
+		},
+		{
+			"default": "0",
+			"fieldname": "notification_include_content",
+			"fieldtype": "Check",
+			"label": "Include Notification Details"
+		},
+		{
+			"default": "1",
+			"fieldname": "notification_include_sender",
+			"fieldtype": "Check",
+			"label": "Include Sender Name"
+		},
+		{
+			"fieldname": "notification_message_template",
+			"fieldtype": "Small Text",
+			"label": "Notification Message Template",
+			"description": "Optional Jinja template. Available keys: subject, content, type, link, user, from_user, from_user_fullname, document_type, document_name"
+		},
+		{
+			"fieldname": "webhook_section",
+			"fieldtype": "Section Break",
+			"label": "Webhook"
+		},
+		{
+			"fieldname": "webhook_secret",
+			"fieldtype": "Password",
+			"label": "Webhook Secret"
+		},
+		{
+			"default": "message,message.ack",
+			"fieldname": "webhook_events",
+			"fieldtype": "Data",
+			"label": "Webhook Events",
+			"description": "Comma-separated event filter passed to GoWA"
+		},
+		{
+			"fieldname": "notes",
+			"fieldtype": "Small Text",
+			"label": "Notes"
+		}
+	],
+	"index_web_pages_for_search": 1,
+	"issingle": 1,
+	"links": [],
+	"modified": "2026-03-22 00:00:00.000000",
+	"modified_by": "Administrator",
+	"module": "Whatapp",
+	"name": "Whatapp Settings",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": [],
+	"track_changes": 1
+}

@@ -1,0 +1,18 @@
+[project]
+name = "whatapp"
+authors = [{ name = "Ahmad", email = "info@ideaorbit.net" }]
+description = "Frappe UI desk for Go WhatsApp multi-device service"
+requires-python = ">=3.10"
+readme = "README.md"
+dynamic = ["version"]
+dependencies = ["frappe", "requests"]
+
+[project.scripts]
+whatapp-local-service = "whatapp.local_service_runner:main"
+
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "whatapp"

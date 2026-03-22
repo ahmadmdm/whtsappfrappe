@@ -1,0 +1,43 @@
+@import "frappe-ui/src/style.css";
+
+:root {
+	--wa-bg: #f4f1ea;
+	--wa-surface: rgba(255, 255, 255, 0.88);
+	--wa-surface-strong: #ffffff;
+	--wa-border: rgba(91, 79, 62, 0.12);
+	--wa-border-strong: rgba(91, 79, 62, 0.2);
+	--wa-text: #2b241c;
+	--wa-muted: #76695a;
+	--wa-muted-2: #9b8b79;
+	--wa-brand: #6f7d48;
+	--wa-brand-strong: #556135;
+	--wa-accent: #d98f5c;
+	--wa-success: #2f8f5b;
+	--wa-danger: #bb5142;
+	--wa-shadow: 0 20px 60px rgba(78, 62, 46, 0.12);
+	--wa-radius: 24px;
+	--wa-radius-sm: 16px;
+	font-family: "IBM Plex Sans Arabic", "Readex Pro", system-ui, sans-serif;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html, body {
+	margin: 0;
+	padding: 0;
+	background:
+		radial-gradient(circle at top left, rgba(217, 143, 92, 0.18), transparent 28%),
+		linear-gradient(180deg, #f8f4ed 0%, var(--wa-bg) 48%, #efe7db 100%);
+	color: var(--wa-text);
+	font-family: inherit;
+}
+
+button, input, textarea, select {
+	font: inherit;
+}
+
+#whatapp-root {
+	min-height: 100vh;
+}

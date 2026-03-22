@@ -1,0 +1,1 @@
+"""Whatapp Settings DocType."""

@@ -2,7 +2,7 @@
 
 Whatapp is a Frappe app that provides a desk UI for the Go WhatsApp multi-device service from `aldinokemal/go-whatsapp-web-multidevice`.
 
-Current app version: `0.2.1`
+Current app version: `0.2.2`
 
 ## Features
 
@@ -99,6 +99,8 @@ For persistent deployment, run that command under your process manager such as:
 - `supervisor`
 - `systemd`
 - a bench `Procfile` entry
+
+If the bench has exactly one site, the runner can auto-detect it. On multi-site benches, set `WHATAPP_SITE` explicitly.
 
 ## Local runtime files
 

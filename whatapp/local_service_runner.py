@@ -10,6 +10,7 @@ import time
 from whatapp.local_service import (
 	ensure_runtime_directories,
 	get_runtime_binary_path,
+	resolve_site_name,
 )
 
 
@@ -50,7 +51,12 @@ def terminate_process(process: subprocess.Popen | None) -> None:
 
 
 def main() -> int:
-	site = os.environ.get("WHATAPP_SITE") or os.environ.get("SITE_NAME") or "srs.localhost"
+	try:
+		site = resolve_site_name()
+	except RuntimeError as exc:
+		print(str(exc), file=sys.stderr)
+		return 1
+
 	paths = ensure_runtime_directories(site)
 	env_path = Path(paths["env_path"])
 	if not env_path.exists():

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import json
 import os
 import platform
 from tempfile import TemporaryDirectory
@@ -56,12 +57,53 @@ def get_bench_root() -> Path:
 	return get_app_root().parents[1]
 
 
+def resolve_site_name(site: str | None = None) -> str:
+	if site:
+		return site
+
+	frappe_site = getattr(frappe.local, "site", None)
+	if frappe_site:
+		return frappe_site
+
+	for env_var in ("WHATAPP_SITE", "SITE_NAME"):
+		value = (os.environ.get(env_var) or "").strip()
+		if value:
+			return value
+
+	sites_root = get_bench_root() / "sites"
+	default_site = sites_root / "currentsite.txt"
+	if default_site.exists():
+		value = default_site.read_text(encoding="utf-8").strip()
+		if value:
+			return value
+
+	common_site_config = sites_root / "common_site_config.json"
+	if common_site_config.exists():
+		try:
+			config = json.loads(common_site_config.read_text(encoding="utf-8"))
+		except Exception:
+			config = {}
+		default_value = (config.get("default_site") or "").strip() if isinstance(config, dict) else ""
+		if default_value:
+			return default_value
+
+	candidates = sorted(
+		path.name
+		for path in sites_root.iterdir()
+		if path.is_dir() and (path / "site_config.json").exists()
+	)
+	if len(candidates) == 1:
+		return candidates[0]
+
+	raise RuntimeError("Could not determine the active site. Set WHATAPP_SITE or SITE_NAME.")
+
+
 def get_runtime_binary_path() -> Path:
 	return get_runtime_root() / "bin" / "whatsapp"
 
 
 def get_runtime_env_path(site: str | None = None) -> Path:
-	selected_site = site or getattr(frappe.local, "site", None) or os.environ.get("WHATAPP_SITE") or "srs.localhost"
+	selected_site = resolve_site_name(site)
 	if getattr(frappe.local, "site", None):
 		return Path(frappe.get_site_path("private", "whatapp", f"gowa-{selected_site}.env"))
 	return get_bench_root() / "sites" / selected_site / "private" / "whatapp" / f"gowa-{selected_site}.env"

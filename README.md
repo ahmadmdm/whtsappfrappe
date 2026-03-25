@@ -39,6 +39,8 @@ This app acts as:
 - Added direct `Send WhatsApp` desk actions on core master forms
 - Tightened manual send permissions so users must be able to read the recipient or reference document they are sending from
 
+See `CHANGELOG.md` for the release history and `.github/release-notes/v0.3.0.md` for the GitHub release text.
+
 ## Phase 1 delivery foundation
 
 This app now includes a `Whatapp Message Log` DocType for outbound auditability.

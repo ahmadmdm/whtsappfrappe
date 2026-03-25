@@ -19,6 +19,8 @@ add_to_apps_screen = [
 	}
 ]
 
+app_include_js = ["/assets/whatapp/js/whatapp_recipient_actions.js"]
+
 doctype_js = {
 	"Employee": "public/js/whatapp_recipient_actions.js",
 	"Customer": "public/js/whatapp_recipient_actions.js",

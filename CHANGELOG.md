@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 - `Notification Log` forwarding now writes through the shared outbound delivery layer.
 - Manual send permissions now require access to the recipient or reference document instead of only allowing `System Manager`.
 - Whatapp desk asset cache version was refreshed to load the latest frontend changes reliably.
+- Direct form sending now shows a clean desk message when the target record has no WhatsApp or mobile number.
 
 ### Dependencies
 

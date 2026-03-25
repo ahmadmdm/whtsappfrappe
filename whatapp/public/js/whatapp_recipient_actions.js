@@ -14,7 +14,14 @@
 	}
 
 	async function openDialog(frm) {
-		const recipient = await resolveRecipient(frm)
+		let recipient
+		try {
+			recipient = await resolveRecipient(frm)
+		} catch (error) {
+			showFailure(error, __("Unable to resolve a WhatsApp number for this record."))
+			return
+		}
+
 		const dialog = new frappe.ui.Dialog({
 			title: __("Send WhatsApp"),
 			fields: [
@@ -68,6 +75,20 @@
 			},
 		})
 		return response.message
+	}
+
+	function showFailure(error, fallbackMessage) {
+		const message =
+			error?.message ||
+			error?.exc_type ||
+			error?.messages?.[0] ||
+			fallbackMessage ||
+			__("WhatsApp action failed.")
+		frappe.msgprint({
+			title: __("WhatsApp"),
+			indicator: "orange",
+			message,
+		})
 	}
 
 	async function sendMessage(frm, values, recipient, dialog) {

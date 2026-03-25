@@ -46,7 +46,11 @@
 			],
 			primary_action_label: __("Send"),
 			primary_action: async (values) => {
-				await sendMessage(frm, values, recipient, dialog)
+				try {
+					await sendMessage(frm, values, recipient, dialog)
+				} catch (error) {
+					showFailure(error, __("WhatsApp message failed to send."))
+				}
 			},
 		})
 
@@ -112,7 +116,7 @@
 
 		const result = response.message || {}
 		if (!result.ok) {
-			frappe.throw(result.error_message || __("WhatsApp message failed to send."))
+			throw new Error(result.error_message || __("WhatsApp message failed to send."))
 		}
 
 		dialog.hide()

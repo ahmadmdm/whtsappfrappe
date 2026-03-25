@@ -2,7 +2,7 @@
 
 Whatapp is a Frappe app that provides a desk UI for the Go WhatsApp multi-device service from `aldinokemal/go-whatsapp-web-multidevice`.
 
-Current app version: `0.2.2`
+Current app version: `0.3.0`
 
 ## Features
 
@@ -13,6 +13,10 @@ Current app version: `0.2.2`
 - Send text messages from a Frappe UI frontend
 - Receive GoWA webhooks with HMAC verification
 - Forward eligible Frappe `Notification Log` entries to WhatsApp
+- Store outbound WhatsApp delivery attempts in `Whatapp Message Log`
+- Send direct WhatsApp updates for HRMS leave application approval flows
+- Send direct WhatsApp updates for ERPNext `Issue` creation and status changes
+- Send ad hoc WhatsApp messages directly from `Employee`, `Customer`, `Supplier`, `Lead`, and `Contact` forms
 - Manage per-user WhatsApp notification numbers from the Whatapp settings screen
 - Read a dedicated `WhatsApp Number` field from the Frappe `User` form as the preferred notification target
 
@@ -24,6 +28,59 @@ This app acts as:
 2. A Frappe Desk page powered by Vue 3 and `frappe-ui`
 3. A webhook receiver for WhatsApp events forwarded by GoWA
 4. A local GoWA bootstrap layer for supported systems
+5. A reusable outbound delivery layer with persistent message logging
+
+## What's new in 0.3.0
+
+- Added a shared outbound delivery layer backed by `Whatapp Message Log` for full send auditability
+- Added master-data recipient resolution for `Employee`, `Customer`, `Supplier`, `Lead`, `Contact`, and `User`
+- Added HRMS `Leave Application` notifications for request, decision, and cancellation events
+- Added ERPNext `Issue` notifications for creation and status changes
+- Added direct `Send WhatsApp` desk actions on core master forms
+- Tightened manual send permissions so users must be able to read the recipient or reference document they are sending from
+
+## Phase 1 delivery foundation
+
+This app now includes a `Whatapp Message Log` DocType for outbound auditability.
+
+Current outbound log statuses:
+
+- `Queued`
+- `Sent`
+- `Failed`
+- `Skipped`
+
+The existing notification forwarding flow writes to this log automatically.
+You can also send typed outbound messages programmatically through `whatapp.api.send_event_message`.
+`send_event_message` can now resolve recipients directly from master records such as `Employee`, `Customer`, `Supplier`, `Lead`, `Contact`, and `User`.
+
+Manual sending from Desk is also available through a `Send WhatsApp` action on supported master forms. The dialog previews the resolved phone number and source before sending.
+
+HRMS `Leave Application` now also sends direct WhatsApp updates for:
+
+- new leave requests to the approver
+- approved or rejected leave decisions to the employee
+- leave cancellations to the employee
+
+ERPNext `Issue` now sends direct WhatsApp updates for:
+
+- new support ticket creation
+- support ticket status changes
+
+Issue recipients are resolved from the linked master in this order:
+
+- `Customer`
+- `Lead`
+- `Contact`
+
+Recipient phone resolution priority now follows the master data itself:
+
+- `Employee.cell_number`
+- `Lead.whatsapp_no`, then `Lead.mobile_no`, then `Lead.phone`
+- `Customer.mobile_no`, then linked `Contact.mobile_no`
+- `Supplier.mobile_no`, then linked `Contact.mobile_no`
+- `Contact.mobile_no`, then `Contact.phone`
+- `User.whatapp_whatsapp_number`, then `User.mobile_no`, then `User.phone`
 
 ## Supported local runtime
 
@@ -37,6 +94,11 @@ The app can install and run the GoWA binary locally for these targets:
 The binary is downloaded from the upstream GitHub release during app bootstrap if it is missing.
 
 ## System dependencies
+
+Python package dependencies remain unchanged for this release and are declared in `pyproject.toml`:
+
+- `frappe`
+- `requests`
 
 For full media support on Linux, install these packages on the target server:
 

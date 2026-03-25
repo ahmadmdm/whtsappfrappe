@@ -5,6 +5,7 @@ from typing import Any
 import frappe
 from frappe.utils import cint, get_datetime, now_datetime, strip_html
 
+from whatapp.delivery import create_message_log, send_outbound_message, update_message_log
 from whatapp.utils.service import WhatappServiceError, get_settings_doc, request_service
 
 
@@ -54,6 +55,22 @@ def forward_notification(doc):
 
 	device_id = resolve_device_id(settings, user_settings)
 	if is_self_target(device_id, phone_number):
+		message_log = create_message_log(
+			event_type="notification_log",
+			status="Skipped",
+			phone_number=phone_number,
+			message=message,
+			device_id=device_id,
+			recipient_user=doc.for_user,
+			reference_doctype=doc.document_type,
+			reference_name=doc.document_name,
+			context=build_log_context(doc, user_profile),
+		)
+		update_message_log(
+			message_log,
+			status="Skipped",
+			error_message="Target WhatsApp number matches the logged-in sending account; self-notifications will not appear as a separate incoming alert.",
+		)
 		update_user_setting_status(
 			user_settings,
 			error="Target WhatsApp number matches the logged-in sending account; self-notifications will not appear as a separate incoming alert.",
@@ -61,15 +78,27 @@ def forward_notification(doc):
 		return
 
 	try:
-		request_service(
-			"POST",
-			"/send/message",
-			json_data={"phone": phone_number, "message": message},
+		message_log = send_outbound_message(
+			event_type="notification_log",
+			phone_number=phone_number,
+			message=message,
 			device_id=device_id,
+			recipient_user=doc.for_user,
+			reference_doctype=doc.document_type,
+			reference_name=doc.document_name,
+			context=build_log_context(doc, user_profile),
 		)
-	except WhatappServiceError as exc:
+	except frappe.ValidationError as exc:
 		update_user_setting_status(user_settings, error=str(exc))
 		raise
+
+	if message_log.status == "Failed":
+		update_user_setting_status(user_settings, error=message_log.error_message)
+		raise WhatappServiceError(message_log.error_message)
+
+	if message_log.status == "Skipped":
+		update_user_setting_status(user_settings, error=message_log.error_message or "Skipped")
+		return
 
 	update_user_setting_status(user_settings, delivered=True)
 
@@ -209,6 +238,19 @@ def compact_message(message: str) -> str:
 		else:
 			blank_pending = True
 	return "\n".join(compacted).strip()
+
+
+def build_log_context(doc, user_profile: dict[str, Any]) -> dict[str, Any]:
+	return {
+		"notification_type": doc.type or "",
+		"subject": strip_html(doc.subject or "").strip(),
+		"document_type": doc.document_type or "",
+		"document_name": doc.document_name or "",
+		"for_user": doc.for_user or "",
+		"for_user_full_name": user_profile.get("full_name") or user_profile.get("name") or "",
+		"from_user": doc.from_user or "",
+		"link": get_notification_link(doc),
+	}
 
 
 def get_notification_link(doc) -> str:

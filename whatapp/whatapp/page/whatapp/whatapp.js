@@ -33,7 +33,7 @@ function loadWhatappDesk() {
 	if (window.WhatappDesk) return Promise.resolve()
 	if (whatappPromise) return whatappPromise
 
-	const version = "20260322g"
+	const version = "20260325a"
 	whatappPromise = Promise.all([
 		injectStylesheet(`/assets/whatapp/dist/whatapp.bundle.css?v=${version}`),
 		injectScript(`/assets/whatapp/dist/whatapp.bundle.js?v=${version}`),

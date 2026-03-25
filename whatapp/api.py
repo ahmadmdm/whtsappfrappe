@@ -9,6 +9,8 @@ from frappe import _
 from frappe.utils import cint
 
 from whatapp.local_service import sync_local_service_config
+from whatapp.recipient_resolver import resolve_recipient
+from whatapp.user_delivery import send_recipient_message
 from whatapp.utils.service import (
 	WhatappServiceError,
 	get_settings_doc,
@@ -23,6 +25,35 @@ def _parse_payload(payload):
 	if isinstance(payload, dict):
 		return payload
 	return frappe.parse_json(payload)
+
+
+def _normalize_reference(data):
+	reference_doctype = (data.get("reference_doctype") or "").strip()
+	reference_name = (data.get("reference_name") or "").strip()
+	if reference_name and not reference_doctype:
+		frappe.throw(_("reference_doctype is required when reference_name is provided"))
+	return reference_doctype, reference_name
+
+
+def _check_document_access(doctype: str | None, name: str | None):
+	if not doctype or not name:
+		return
+	if not frappe.has_permission(doctype, doc=name, ptype="read"):
+		frappe.throw(_("Not permitted to access {0} {1}").format(doctype, name), frappe.PermissionError)
+
+
+def _ensure_send_permission(data, recipient):
+	if frappe.session.user == "Guest":
+		frappe.throw(_("Login required"), frappe.PermissionError)
+
+	recipient_doctype = recipient.get("recipient_doctype") or ""
+	recipient_name = recipient.get("recipient_name") or ""
+	if not recipient_doctype and not recipient_name:
+		frappe.only_for("System Manager")
+		return
+
+	_check_document_access(recipient_doctype, recipient_name)
+	_check_document_access((data.get("reference_doctype") or "").strip(), (data.get("reference_name") or "").strip())
 
 
 def _public_settings(doc):
@@ -323,6 +354,75 @@ def send_text_message(device_id=None, phone=None, message=None, reply_message_id
 		json_data=payload,
 		device_id=sanitize_device_id(device_id, _("Device ID"), allow_empty=False),
 	)
+
+
+@frappe.whitelist()
+def send_event_message(payload=None):
+	data = _parse_payload(payload)
+	if not isinstance(data, dict):
+		frappe.throw(_("payload must be a JSON object"))
+
+	reference_doctype, reference_name = _normalize_reference(data)
+	recipient = resolve_recipient(
+		(data.get("recipient_doctype") or "").strip(),
+		(data.get("recipient_name") or "").strip(),
+		phone_number=(data.get("phone") or data.get("phone_number") or "").strip(),
+	)
+	_ensure_send_permission(
+		{
+			**data,
+			"reference_doctype": reference_doctype,
+			"reference_name": reference_name,
+		},
+		recipient,
+	)
+	log = send_recipient_message(
+		recipient.get("recipient_doctype"),
+		recipient.get("recipient_name"),
+		event_type=(data.get("event_type") or "system").strip() or "system",
+		message=(data.get("message") or "").strip(),
+		reference_doctype=reference_doctype or None,
+		reference_name=reference_name or None,
+		context=build_event_context(data, recipient),
+		phone_number=recipient["phone_number"],
+		recipient_user=(data.get("recipient_user") or recipient.get("recipient_user") or "").strip() or None,
+	)
+	frappe.db.commit()
+	return {
+		"ok": log.status == "Sent",
+		"name": log.name,
+		"status": log.status,
+		"error_message": log.error_message,
+		"phone_number": recipient["phone_number"],
+		"phone_source": recipient.get("source"),
+	}
+
+
+@frappe.whitelist()
+def resolve_recipient_info(payload=None):
+	data = _parse_payload(payload)
+	if not isinstance(data, dict):
+		frappe.throw(_("payload must be a JSON object"))
+
+	recipient = resolve_recipient(
+		(data.get("recipient_doctype") or "").strip(),
+		(data.get("recipient_name") or "").strip(),
+		phone_number=(data.get("phone") or data.get("phone_number") or "").strip(),
+	)
+	_ensure_send_permission(data, recipient)
+	return recipient
+
+
+def build_event_context(data, recipient):
+	context = data.get("context") if isinstance(data.get("context"), dict) else {}
+	context.update(
+		{
+			"recipient_doctype": recipient.get("recipient_doctype") or "",
+			"recipient_name": recipient.get("recipient_name") or "",
+			"phone_source": recipient.get("source") or "",
+		}
+	)
+	return context
 
 
 @frappe.whitelist(allow_guest=True)

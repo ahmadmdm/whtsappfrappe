@@ -19,9 +19,26 @@ add_to_apps_screen = [
 	}
 ]
 
+doctype_js = {
+	"Employee": "public/js/whatapp_recipient_actions.js",
+	"Customer": "public/js/whatapp_recipient_actions.js",
+	"Supplier": "public/js/whatapp_recipient_actions.js",
+	"Lead": "public/js/whatapp_recipient_actions.js",
+	"Contact": "public/js/whatapp_recipient_actions.js",
+}
+
 doc_events = {
 	"Notification Log": {
 		"after_insert": "whatapp.notification_forwarding.on_notification_log_after_insert",
+	},
+	"Leave Application": {
+		"after_insert": "whatapp.hrms_events.on_leave_application_after_insert",
+		"on_submit": "whatapp.hrms_events.on_leave_application_on_submit",
+		"on_cancel": "whatapp.hrms_events.on_leave_application_on_cancel",
+	},
+	"Issue": {
+		"after_insert": "whatapp.issue_events.on_issue_after_insert",
+		"on_update": "whatapp.issue_events.on_issue_on_update",
 	}
 }
 

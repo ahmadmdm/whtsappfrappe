@@ -1,0 +1,1 @@
+"""Whatapp Message Log DocType."""

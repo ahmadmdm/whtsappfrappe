@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint
 
-from whatapp.local_service import sync_local_service_config
+from whatapp.local_service import get_local_webhook_base_url, sync_local_service_config
 from whatapp.recipient_resolver import resolve_recipient
 from whatapp.user_delivery import send_recipient_message
 from whatapp.utils.service import (
@@ -89,7 +89,7 @@ def get_bootstrap():
 			"enabled": doc.enabled,
 		},
 		"default_device_id": doc.default_device_id or "",
-		"webhook_url": f"{frappe.utils.get_url()}/api/method/whatapp.api.receive_webhook",
+		"webhook_url": f"{get_local_webhook_base_url()}/api/method/whatapp.api.receive_webhook",
 		"devices": [],
 	}
 
@@ -251,7 +251,7 @@ def save_notification_users(payload=None):
 
 @frappe.whitelist()
 def list_devices(raw=False):
-	result = request_service("GET", "/devices")
+	result = request_service("GET", "/devices") or []
 	return result if raw else {"data": result}
 
 

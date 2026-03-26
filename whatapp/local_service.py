@@ -14,7 +14,7 @@ import frappe
 
 
 LOCAL_SERVICE_HOST = "127.0.0.1"
-LOCAL_SERVICE_PORT = 8000
+LOCAL_SERVICE_PORT = 3000
 DEFAULT_SERVICE_URL = f"http://{LOCAL_SERVICE_HOST}:{LOCAL_SERVICE_PORT}"
 LOCAL_RELEASE_VERSION = "8.3.3"
 LOCAL_RELEASE_BASE_URL = "https://github.com/aldinokemal/go-whatsapp-web-multidevice/releases/download"
@@ -139,6 +139,30 @@ def _build_basic_auth(doc) -> str:
 	return f"{username}:{password}"
 
 
+def get_local_webhook_base_url() -> str:
+	host_name = (getattr(frappe.conf, "host_name", None) or "").strip()
+	if host_name:
+		if "://" not in host_name:
+			host_name = f"http://{host_name}"
+		return host_name.rstrip("/")
+
+	domains = getattr(frappe.conf, "domains", None) or []
+	prioritized_domains = []
+	for domain in domains:
+		value = str(domain or "").strip()
+		if not value:
+			continue
+		prioritized_domains.append(value)
+
+	for domain in prioritized_domains:
+		if ":" in domain:
+			return f"http://{domain}".rstrip("/")
+	if prioritized_domains:
+		return f"http://{prioritized_domains[0]}".rstrip("/")
+
+	return frappe.utils.get_url().rstrip("/")
+
+
 def build_runtime_env(doc) -> dict[str, str]:
 	service_url = (doc.service_url or "").strip() or DEFAULT_SERVICE_URL
 	port = LOCAL_SERVICE_PORT
@@ -173,6 +197,7 @@ def build_runtime_env(doc) -> dict[str, str]:
 		env["WHATSAPP_WEBHOOK_SECRET"] = webhook_secret
 	if webhook_events:
 		env["WHATSAPP_WEBHOOK_EVENTS"] = webhook_events
+	env["WHATSAPP_WEBHOOK"] = f"{get_local_webhook_base_url()}/api/method/whatapp.api.receive_webhook"
 	return env
 
 
